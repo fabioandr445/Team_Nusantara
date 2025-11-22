@@ -8,38 +8,46 @@ generator client {
   provider = "prisma-client-js"
 }
 
-//DATABASE
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  role       String   @default("user") // user | admin
-  bookings   Booking[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  orders    Order[]
 }
 
-model Booking {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  serviceType String
-  vehicle     String
-  date        DateTime
-  status      String   @default("pending")
-  tracking    Tracking?
-  createdAt   DateTime @default(now())
+model Service {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  // Tambahkan ini
+  orders Order[]
 }
 
-model Tracking {
-  id         Int     @id @default(autoincrement())
-  booking    Booking @relation(fields: [bookingId], references: [id])
-  bookingId  Int @unique
-  progress   String
-  updatedAt  DateTime @default(now())
+model Order {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+  user      User    @relation(fields: [userId], references: [id])
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
