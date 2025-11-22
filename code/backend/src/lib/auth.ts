@@ -3,7 +3,13 @@ import bcrypt from "bcryptjs";
 
 const SECRET = process.env.JWT_SECRET || "SUPER_SECRET_KEY";
 
-export function signToken(payload: any) {
+type TokenPayload = {
+  id: number;
+  email: string;
+  role?: string;
+};
+
+export function signToken(payload: TokenPayload) {
   return jwt.sign(payload, SECRET, { expiresIn: "7d" });
 }
 
