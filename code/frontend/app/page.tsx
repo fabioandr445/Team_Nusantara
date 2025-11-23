@@ -15,5 +15,22 @@ export default function LoginPage() {
     router.push("/dashboard");       // perbaikan pemanggilan router
   }
 
-  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input 
+        value={u} 
+        onChange={(e) => setU(e.target.value)} 
+        placeholder="Username"
+      />
+
+      <input 
+        type="password"
+        value={p}
+        onChange={(e) => setP(e.target.value)}
+        placeholder="Password"
+      />
+
+      <button type="submit">Login</button>
+    </form>
+  );
 }
