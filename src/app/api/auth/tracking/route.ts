@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyJwt } from "@/lib/jwt";
 
+
 // =======================
 // GET ALL TRACKING (ADMIN ONLY)
 // =======================
