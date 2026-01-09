@@ -1,125 +1,82 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
-
   const [form, setForm] = useState({
+    name: "",
     email: "",
-    username: "",
     password: "",
-    confirm: "",
   });
+  const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    // Validasi sederhana
-    if (!form.email.includes("@")) {
-      alert("Email tidak valid!");
-      return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Registrasi gagal");
+        return;
+      }
+
+      router.push("/login");
+    } catch {
+      setError("Server tidak dapat dihubungi");
     }
-
-    if (form.password.length < 6) {
-      alert("Password minimal 6 karakter!");
-      return;
-    }
-
-    if (form.password !== form.confirm) {
-      alert("Password tidak sama!");
-      return;
-    }
-
-    // Nanti tinggal ganti ke API backend kamu
-    alert("Registrasi berhasil!");
-    router.push("/login");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-700 p-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded w-96">
+        <h2 className="text-2xl font-bold mb-4">Register</h2>
 
-        <h2 className="text-3xl font-bold text-center text-white mb-6">
-          Buat Akun Baru
-        </h2>
+        {error && <p className="text-red-500 mb-2">{error}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Email</label>
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="example@gmail.com"
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-          </div>
+        <input
+          placeholder="Nama"
+          className="w-full p-2 border mb-3"
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
 
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Username</label>
-            <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="Masukkan username"
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-          </div>
+        <input
+          placeholder="Email"
+          className="w-full p-2 border mb-3"
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
 
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Password</label>
-            <input
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Masukkan password"
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-          </div>
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-2 border mb-3"
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
 
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Konfirmasi Password</label>
-            <input
-              name="confirm"
-              type="password"
-              value={form.confirm}
-              onChange={handleChange}
-              placeholder="Ulangi password"
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-          </div>
+        <button className="w-full bg-green-600 text-white p-2 rounded">
+          Register
+        </button>
 
-          <button
-            type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 transition text-white p-3 rounded-xl font-semibold"
-          >
-            Daftar Sekarang
-          </button>
-        </form>
-
-        <div className="text-center mt-5">
-          <p className="text-gray-300">
-            Sudah punya akun?{" "}
-            <Link
-              href="/login"
-              className="text-blue-400 hover:text-blue-500 underline transition"
-            >
-              Login di sini
-            </Link>
-          </p>
-        </div>
-
-      </div>
+        <p className="mt-3 text-sm">
+          Sudah punya akun?{" "}
+          <Link href="/login" className="text-blue-500">
+            Login
+          </Link>
+        </p>
+      </form>
     </div>
   );
 }
