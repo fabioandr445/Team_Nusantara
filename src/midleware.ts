@@ -34,3 +34,26 @@ export function middleware(req: NextRequest) {
       id: number;
       role: "user" | "admin";
     };
+
+
+    / ==========================
+    // ADMIN ONLY ROUTE
+    // ==========================
+    if (
+      pathname.startsWith("/api/tracking") &&
+      payload.role !== "admin"
+    ) {
+      return NextResponse.json(
+        { message: "Forbidden - Admin only" },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.json(
+      { message: "Invalid or expired token" },
+      { status: 401 }
+    );
+  }
+}
