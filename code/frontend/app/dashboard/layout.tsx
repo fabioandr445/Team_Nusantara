@@ -1,26 +1,30 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { isLoggedIn } from "@/lib/auth";
 import Sidebar from "../components/sidebar";
 import Navbar from "../components/navbar";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      router.push("/login");
+    }
+  }, [router]);
 
   return (
-    // Layout utama dashboard (horizontal: sidebar | konten)
     <div className="flex">
-
-      {/* Sidebar di sebelah kiri */}
       <Sidebar />
-
-      {/* Bagian kanan: Navbar + konten */}
-      <div className="flex-1 bg-gray-100 min-h-screen">
-
-        {/* Navbar di bagian atas */}
+      <div className="flex-1">
         <Navbar />
-
-        {/* Konten halaman otomatis dimasukkan di sini */}
-        <main className="p-6">
-          {children}
-        </main>
-
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );
