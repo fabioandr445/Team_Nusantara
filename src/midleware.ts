@@ -57,3 +57,13 @@ export function middleware(req: NextRequest) {
     );
   }
 }
+
+// ==========================
+// ROUTE YANG DIJAGA
+// ==========================
+export const config = {
+  matcher: [
+    "/api/bookings/:path*",
+    "/api/tracking/:path*",
+  ],
+};
