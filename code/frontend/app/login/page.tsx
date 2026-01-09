@@ -3,71 +3,76 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { saveToken } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setError("");
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login gagal");
+        return;
+      }
+
+      saveToken(data.token);
+      router.push("/dashboard");
+    } catch (err) {
+      setError("Server tidak dapat dihubungi");
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-700 p-4">
-      
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl">
-        
-        <h2 className="text-3xl font-bold text-center text-white mb-6">
-          Bengkel Mobil Auto 2000
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded w-96">
+        <h2 className="text-2xl font-bold mb-4">Login</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {error && <p className="text-red-500 mb-2">{error}</p>}
 
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Username</label>
-            <input
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={u}
-              onChange={(e) => setU(e.target.value)}
-              placeholder="Enter username"
-            />
-          </div>
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-2 border mb-3"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <div className="flex flex-col">
-            <label className="text-white mb-1">Password</label>
-            <input
-              type="password"
-              className="p-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={p}
-              onChange={(e) => setP(e.target.value)}
-              placeholder="Enter password"
-            />
-          </div>
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-2 border mb-3"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 transition text-white p-3 rounded-xl font-semibold"
-          >
-            Login
-          </button>
-        </form>
+        <button className="w-full bg-blue-600 text-white p-2 rounded">
+          Login
+        </button>
 
-        {/* Bagian daftar akun */}
-        <div className="text-center mt-5">
-          <p className="text-gray-300">
-            Belum punya akun?{" "}
-            <Link
-              href="/register"
-              className="text-blue-400 hover:text-blue-500 underline transition"
-            >
-              Daftar sekarang
-            </Link>
-          </p>
-        </div>
-
-      </div>
+        <p className="mt-3 text-sm">
+          Belum punya akun?{" "}
+          <Link href="/register" className="text-blue-500">
+            Register
+          </Link>
+        </p>
+      </form>
     </div>
   );
 }
