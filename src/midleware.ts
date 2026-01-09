@@ -14,3 +14,23 @@ export function middleware(req: NextRequest) {
   ) {
     return NextResponse.next();
   }
+
+   // ==========================
+  // CEK AUTH HEADER
+  // ==========================
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+
+  try {
+    const payload = verifyJwt(token) as {
+      id: number;
+      role: "user" | "admin";
+    };
